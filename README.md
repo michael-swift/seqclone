@@ -61,5 +61,7 @@ $ jupyter notebook
 
 Usage
 ------------
-``` bash $ conda activate seqclone
-    bash $ python seqclone/CloneStats.py SS2.ini
+```bash
+$ conda activate seqclone
+$ python seqclone/CloneStats.py SS2.ini
+``` 
