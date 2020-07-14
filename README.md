@@ -61,6 +61,7 @@ $ jupyter notebook
 
 Usage
 ------------
+Path to the data is specified in the .ini file
 ```bash
 $ conda activate seqclone
 $ cd seqclone/ 
