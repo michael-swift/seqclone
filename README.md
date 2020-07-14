@@ -56,3 +56,10 @@ Run Jupyter Notebook and open the notebooks in `notebooks/`:
 ```bash
 $ jupyter notebook
 ```
+--------
+
+
+Usage
+------------
+``` bash $ conda activate seqclone
+    bash $ python seqclone/CloneStats.py SS2.ini

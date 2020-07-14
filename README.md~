@@ -42,10 +42,10 @@ Install the virtual environment with conda and activate it:
 
 ```bash
 $ conda env create -f environment.yml
-$ source activate example-project 
+$ conda activate seqclone 
 ```
 
-Install `exampleproject` in the virtual environment:
+Install `seqclone` in the conda virtual environment:
 
 ```bash
 $ pip install --editable .
