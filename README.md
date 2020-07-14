@@ -63,5 +63,6 @@ Usage
 ------------
 ```bash
 $ conda activate seqclone
-$ python seqclone/CloneStats.py SS2.ini
+$ cd seqclone/ 
+$ python CloneStats.py SS2.ini
 ``` 
