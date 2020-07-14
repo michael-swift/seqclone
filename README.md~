@@ -1,13 +1,13 @@
 SeqClone
 ==============================
 
-Example project structure.
+Project Structure
 
 Project Organization
 ------------
 
     │
-    ├── data/               <- The original, immutable data dump. 
+    ├── data/    
     │
     ├── figures/            <- Figures saved by scripts or notebooks.
     │
@@ -19,7 +19,7 @@ Project Organization
     │
     ├── tests/              <- Unit tests.
     │
-    ├── exampleproject/     <- Python module with source code of this project.
+    ├── seqclone/     <- Python module with source code of this project.
     │
     ├── environment.yml     <- conda virtual environment definition file.
     │

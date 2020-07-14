@@ -1,4 +1,4 @@
-name: seqclone
+name: singlecell
 channels:
   - conda-forge
   - defaults
