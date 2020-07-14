@@ -1,0 +1,10 @@
+README.md
+setup.py
+switchy/__init__.py
+switchy/data.py
+switchy/plot.py
+switchy/util.py
+switchy.egg-info/PKG-INFO
+switchy.egg-info/SOURCES.txt
+switchy.egg-info/dependency_links.txt
+switchy.egg-info/top_level.txt
