@@ -65,5 +65,5 @@ Path to the data is specified in the .ini file. Data can be downloaded from Goog
 ```bash
 $ conda activate seqclone
 $ cd seqclone/ 
-$ python CloneStats.py SS2.ini
+$ python CloneStats.py test.ini
 ``` 
