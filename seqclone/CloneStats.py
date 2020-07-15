@@ -43,6 +43,7 @@ def prepareData(CountsFile, datatype, highly_variable, n_highly_variable, onlyCl
         the rest of the parameters a passed by the config
     Returns: adata after filtering"""
     adata = sc.read_h5ad(CountsFile)
+    print(adata)
     adata, df = preprocessWScanpy(adata, datatype, highly_variable, n_highly_variable, remove_immune_receptors, normalize, filterCells)
     # After filtering select only cells which are clones
     if onlyClones == True:
