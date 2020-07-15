@@ -51,12 +51,11 @@ Install `seqclone` in the conda virtual environment:
 $ pip install --editable .
 ```
 
-Run Jupyter Notebook and open the notebooks in `notebooks/`:
+Decompress data
 
-```bash
-$ jupyter notebook
+```bash 
+$ gunzip data/CombinedDivision.h5ad
 ```
---------
 
 
 Usage
