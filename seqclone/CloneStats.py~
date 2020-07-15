@@ -312,6 +312,9 @@ def permutationTest(df, adata_obs, num_shuffles, label):
     pvals = []
     genes = df.columns
     print("Running Permutation Test with", label, "and", num_shuffles, 'Shuffles')
+    # This would be the natural place to parallelize: 
+    # Start an individual process which run the code in this loop a chunk of the genes iterable  
+    # merge all the results of the processes together after
     for gene in genes:
         gene_score, gene, mean_shuffled_variances, mean_observedlabel_variance = compareVariances(df, LabelsTesting, num_shuffles, label, gene)
         tested_genes.append(gene)
@@ -321,6 +324,7 @@ def permutationTest(df, adata_obs, num_shuffles, label):
         pval = calculatePvalue(mean_shuffled_variances, mean_observedlabel_variance)
         pvals.append(pval)
         print('Testing', gene)
+    # merge results here
     scoresColumn = pd.Series(gene_scores)
     genesColumn = pd.Series(tested_genes)
     pvalColumn = pd.Series(pvals)

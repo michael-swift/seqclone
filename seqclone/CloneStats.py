@@ -25,7 +25,7 @@ from statsmodels.stats.multitest import multipletests
 
 np.seterr(all = 'warn')
 
-cfgFile = sys.argv[1] # '../switchy/SS2.ini'
+cfgFile = sys.argv[1] 
 
 def readConfig(cfgFile):
     config = configparser.ConfigParser()
@@ -36,7 +36,7 @@ def readConfig(cfgFile):
     out_dir = io['out_dir']
     return stat_parameters, io, config
 
-# Load the data a get filter into a usable form
+# Load the data and filter into a usable form
 def prepareData(CountsFile, datatype, highly_variable, n_highly_variable, onlyClones, remove_immune_receptors, normalize, filterCells):
     """ Accepts: H5ad file from scanpy where the adata.obs has a column "CLONE" denoting the clonal membership of the cell
         dataype: "scaled" or anything else would make it return log
@@ -44,8 +44,9 @@ def prepareData(CountsFile, datatype, highly_variable, n_highly_variable, onlyCl
     Returns: adata after filtering"""
     adata = sc.read_h5ad(CountsFile)
     print(adata)
+    # Use Scanpy to apply filtering criteria specified in config file
     adata, df = preprocessWScanpy(adata, datatype, highly_variable, n_highly_variable, remove_immune_receptors, normalize, filterCells)
-    # After filtering select only cells which are clones
+    # After filtering, select only cells which are clones
     if onlyClones == True:
         # Logic for dropping non-clones from the klein dataset
         #adata.obs.CLONE.fillna('None', inplace = True)
@@ -60,7 +61,7 @@ def prepareData(CountsFile, datatype, highly_variable, n_highly_variable, onlyCl
 
 def preprocessWScanpy(adata, datatype, highly_variable, n_highly_variable, remove_immune_receptors, normalize, filterCells):
     if remove_immune_receptors == True:
-        # TODO: Supply this as a metadata file or somehow incorporate this information into the adata.var e.g immune-variable_receptor (True/False)
+        # TODO: somehow incorporate this information into the adata.var e.g immune-variable_receptor (True/False)
         immune_receptors = pd.read_csv('../metadata/immune_receptor_genes_keepConstantRegion.csv', index_col=0)
         immune_receptors.columns = ['genes']
         print("removing variable immune receptor genes which may drive clustering")
@@ -265,6 +266,8 @@ def plotEgHists(df, adata_obs, num_shuffles, gene, label):
     return fig, data, data_shuffled
     #save_figure(fig, gene+'_'+label, 'figures/permutationTests')
 
+
+
 def compareVariances(df, LabelsTesting, num_shuffles, label, gene):
     "For each gene compare the mean variances of a shuffled labeling to the observed labeling"
     LabelsTesting.loc[:,'gene_name'] = df[gene]
@@ -333,10 +336,12 @@ def permutationTest(df, adata_obs, num_shuffles, label):
     df_tests.columns = ['score', 'gene', 'pvalue', 'corrected_pvalue']
     # what are the nas? probably where there is only 1 clone? 
     df_tests.dropna(inplace = True)
+    # multiple testing correction
     df_tests.loc[:,'corrected_pvalue'] = multipletests(df_tests['pvalue'].values, alpha = 0.05, method = 'bonferroni')[1]
     return df_tests
 
 def write_results(df_tests, parameters, io, adata, config):
+    # Merge with adata.var to get gene qc information
     df_results = pd.merge(adata.var, df_tests, left_index = True, right_on='gene')
     df_results.sort_values('corrected_pvalue', inplace = True)
     out_dir = io['out_dir']
