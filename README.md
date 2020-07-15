@@ -1,7 +1,7 @@
 SeqClone
 ==============================
 
-Project Structure
+seqclone identifies genes in single cell RNA-seq data which are clonally regulated.
 
 Project Organization
 ------------
