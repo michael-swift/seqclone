@@ -51,12 +51,12 @@ Install `seqclone` in the conda virtual environment:
 $ pip install --editable .
 ```
 
-Run Jupyter Notebook and open the notebooks in `notebooks/`:
+Decompress data
 
-```bash
-$ jupyter notebook
+```bash 
+$ gunzip data/CombinedDivision.h5ad.gz
 ```
---------
+Or simply download it from the Google Drive link
 
 
 Usage
@@ -65,5 +65,5 @@ Path to the data is specified in the .ini file. Data can be downloaded from Goog
 ```bash
 $ conda activate seqclone
 $ cd seqclone/ 
-$ python CloneStats.py SS2.ini
+$ python CloneStats.py test.ini
 ``` 
