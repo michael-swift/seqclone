@@ -7,7 +7,7 @@ Project Organization
 ------------
 
     │
-    ├── data/    
+    ├── data/    <--- https://drive.google.com/file/d/1pwDhRTRI-Oh_HisETlYkxtUThIepnVX5/view?usp=sharing
     │
     ├── figures/            <- Figures saved by scripts or notebooks.
     │
@@ -61,7 +61,7 @@ $ jupyter notebook
 
 Usage
 ------------
-Path to the data is specified in the .ini file
+Path to the data is specified in the .ini file. Data can be downloaded from Google Drive.
 ```bash
 $ conda activate seqclone
 $ cd seqclone/ 
