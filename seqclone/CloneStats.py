@@ -22,7 +22,7 @@ from scipy.stats import t
 # bonferroni correction
 from statsmodels.stats.multitest import multipletests
 
-#CountsFile = sys.argv[1]
+
 np.seterr(all = 'warn')
 
 cfgFile = sys.argv[1] # '../switchy/SS2.ini'
@@ -47,7 +47,7 @@ def prepareData(CountsFile, datatype, highly_variable, n_highly_variable, onlyCl
     # After filtering select only cells which are clones
     if onlyClones == True:
         # Logic for dropping non-clones from the klein dataset
-        adata.obs.CLONE.fillna('None', inplace = True)
+        #adata.obs.CLONE.fillna('None', inplace = True)
         adata = adata[adata.obs.CLONE != 'NaN' ,:]
         # Select only clones (applies to my dataset mostly)
         selector = adata.obs.CLONE.value_counts() > 1
