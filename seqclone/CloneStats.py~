@@ -60,7 +60,7 @@ def prepareData(CountsFile, datatype, highly_variable, n_highly_variable, onlyCl
 def preprocessWScanpy(adata, datatype, highly_variable, n_highly_variable, remove_immune_receptors, normalize, filterCells):
     if remove_immune_receptors == True:
         # TODO: Supply this as a metadata file or somehow incorporate this information into the adata.var e.g immune-variable_receptor (True/False)
-        immune_receptors = pd.read_csv('../metadata/immune_receptor_genes_keepConstantRegion.csv', index_col=0)
+        immune_receptors = pd.read_csv('/home/mswift/B_cells/CSR/sc_RNAseq/data_tables/metadata/immune_receptor_genes_keepConstantRegion.csv', index_col=0)
         immune_receptors.columns = ['genes']
         print("removing variable immune receptor genes which may drive clustering")
         adata = adata[:, ~adata.var.index.isin(immune_receptors.genes)]
