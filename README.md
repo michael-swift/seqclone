@@ -54,8 +54,9 @@ $ pip install --editable .
 Decompress data
 
 ```bash 
-$ gunzip data/CombinedDivision.h5ad
+$ gunzip data/CombinedDivision.h5ad.gz
 ```
+Or simply download it from the Google Drive link
 
 
 Usage
