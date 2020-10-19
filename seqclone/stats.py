@@ -33,7 +33,6 @@ def prepare_data(CountsFile, datatype, highly_variable, n_highly_variable, onlyC
         the rest of the parameters a passed by the config
     Returns: adata after filtering"""
     adata = sc.read_h5ad(CountsFile)
-    # print(adata)
     # Use Scanpy to apply filtering criteria specified in config file
     adata, df = preprocess_wscanpy(adata, datatype, highly_variable, n_highly_variable, remove_immune_receptors,
                                   normalize, filterCells)
@@ -42,11 +41,12 @@ def prepare_data(CountsFile, datatype, highly_variable, n_highly_variable, onlyC
         # Logic for dropping non-clones from the klein dataset
         # adata.obs.CLONE.fillna('None', inplace = True)
         adata = adata[adata.obs.CLONE != 'NaN', :]
-        # Select only clones (applies to my dataset mostly)
+        #Select only clones (applies to my dataset mostly)
         selector = adata.obs.CLONE.value_counts() > 1
         selector = selector[selector == True]
         adata = adata[adata.obs.CLONE.isin(selector.index), :]
         df = df[df.index.isin(adata.obs.index)]
+   
     return adata, df
 
 
@@ -100,20 +100,28 @@ def convert_sparse_to_dataframe(adata):
     return df
 
 
-def compare_variances(df, labels_testing, num_shuffles, label, gene):
-    """For each gene compare the mean variances of a shuffled labeling to the observed labeling"""
-    labels_testing.loc[:, 'gene_name'] = df[gene]
+def compare_variances(df, _adata_obs, num_shuffles, label, gene, well):
+    """ comparer the mean variances of a shuffled labeling to the observed labeling of a given labeling and gene"""
+    _adata_obs.loc[:, 'gene_name'] = df[gene]
     mean_shuffled_variances = []
-    observedlabel_var = labels_testing.groupby(label)['gene_name'].var()
+    observedlabel_var = _adata_obs.groupby(label)['gene_name'].var()
     mean_observedlabel_variance = observedlabel_var.mean()
+    
+    
     # do the shuffling
     for i in range(num_shuffles):
         # create copy
-        labels_testing_copy = labels_testing.copy(deep=True)
+        _adata_obs_copy = _adata_obs.copy(deep=True)
         # shuffle labels
-        labels_testing_copy.loc[:, label] = np.random.permutation(labels_testing[label].values)
+        well = 'Experimental_Label'
+        label = 'CLONE'
+        list_of_dfs = []
+        for group, frame in _adata_obs_copy.groupby(well):
+            frame.loc[:,label] = np.random.permutation(frame.loc[:,label].values)
+            list_of_dfs.append(frame)
+        _adata_obs_copy = pd.concat(list_of_dfs)
         # groupby by label and compute variance
-        shuffled_variances = labels_testing_copy.groupby(label)['gene_name'].var()
+        shuffled_variances = _adata_obs_copy.groupby(label)['gene_name'].var()
         # Mean variance of every labeled group
         mean_shuffled_variances.append(shuffled_variances.mean())
     # make list into series TODO refactor to just add to a series?
@@ -140,11 +148,11 @@ def calculate_pvalue(mean_shuffled_variances, mean_observedlabel_variance):
     return pvalue
 
 
-def permutation_test(df, adata_obs, num_shuffles, label):
+def permutation_test(df, _adata_obs, num_shuffles, label, well):
     """ df is the cell x gene dataframe, adata_obs is metadataframe that
     contains cells as the index and a categorical column with the same name as the label"""
     # Get Annotation (clone data) and only what is in the scaled or transformed gene expression df
-    labels_testing = adata_obs[adata_obs.index.isin(df.index)]
+    _adata_obs = _adata_obs[_adata_obs.index.isin(df.index)]
     tested_genes = []
     gene_scores = []
     pvals = []
@@ -154,9 +162,9 @@ def permutation_test(df, adata_obs, num_shuffles, label):
     # Start an individual process which run the code in this loop a chunk of the genes iterable
     # merge all the results of the processes together after
     for gene in genes:
-        gene_score, gene, mean_shuffled_variances, mean_observedlabel_variance = compare_variances(df, labels_testing,
+        gene_score, gene, mean_shuffled_variances, mean_observedlabel_variance = compare_variances(df, _adata_obs,
                                                                                                    num_shuffles, label,
-                                                                                                   gene)
+                                                                                                   gene, well)
         tested_genes.append(gene)
         gene_scores.append(gene_score)
         # Calculate p-value by fitting Gaussian to null distribution
@@ -164,6 +172,7 @@ def permutation_test(df, adata_obs, num_shuffles, label):
         pval = calculate_pvalue(mean_shuffled_variances, mean_observedlabel_variance)
         pvals.append(pval)
         print('Testing', gene)
+    
     # merge results here
     scores_column = pd.Series(gene_scores)
     genes_column = pd.Series(tested_genes)
@@ -207,7 +216,8 @@ def main():
                              parameters.getboolean('normalize'),
                              parameters.getboolean('filterCells'))
     # Run the Tests
-    df_tests = permutation_test(df, adata.obs, int(parameters['num_shuffles']), parameters['label'])
+    print(adata)
+    df_tests = permutation_test(df, adata.obs, int(parameters['num_shuffles']), parameters['label'], parameters['well'])
     # Write test results out as well as the exact config file used for this run (for logging)
     write_results(df_tests, parameters, io, adata, config)
     print("Completed Stats Testing... \n Good Job Everyone")

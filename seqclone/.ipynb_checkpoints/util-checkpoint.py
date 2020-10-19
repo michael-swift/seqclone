@@ -7,11 +7,10 @@ import matplotlib as mpl
 import scanpy as sc
 from matplotlib import pyplot as plt
 import scanpy.external as sce
-
-
-def joke():
-    return "A woman walks into a bar and said ouch, what's with all the toxic masculinity amirite??"
-
+import os 
+import scipy.spatial.distance
+cwd = os.getcwd()
+print(cwd)
 
 def getLineagesFromChangeo(changeodb, print_summary):
     """subsets the changeo_db output by bracer by only those cells which are within lineages (non singletons)"""
@@ -28,9 +27,20 @@ def getLineagesFromChangeo(changeodb, print_summary):
         print(CHANGEO_confidentlineages.shape[0]/df.shape[0], 'percent of cells in a lineage' )
     return CHANGEO_confidentlineages
 
+# calculate distance metric
+def calculate_distance_metric(_clonal_comparison, df):
+    # iterate, i know this is bad style.. 
+    for index, row in _clonal_comparison.iterrows():
+        # Cell to cell comparison
+        cell1 = row['cell1']
+        cell2 = row['cell2']
+        # df.loc is an array that you make
+        _clonal_comparison.loc[index, 'distance'] = distance.euclidean(df.loc[cell2, :].values, df.loc[cell1, :].values)
+    return _clonal_comparison
+
 # get lineage correlations for all groups
 def calculateLineageCorrelations(counts_table, changeo_db, method):
-    """returns within lineage, amongst lineage, amongst all cells 
+    """ returns within lineage, amongst lineage, amongst all cells 
     ie a list or series of correlations between different groupings of cells (all, sisters, within lineage etc.)"""
 
     if method == 'euclidean_distance':
@@ -149,34 +159,34 @@ def addMetadataToAnnData(adata, changeodb_H, ab_tx):
     #_adata.obs = _adata.obs.fillna('no_assembly')
     return _adata
 
-def loadSJoutIGH(filename):
+def loadSJoutIGH(filename, metadata):
     df_sjout = pd.read_feather(filename)
     #filter dataframe to just the IGH locus
     print("filtering SJout to just IGH locus")
     df_IGH = df_sjout[(df_sjout['end'] > 105550000)]
     #load metadata about constant region exon coordinates and I exons
-    df_exoncoordinates = pd.read_csv("/home/mswift/B_cells/CSR/sc_RNAseq/data_tables/metadata/IGHC_exon_coordinates.csv" , header = None, names = ['exon', 'coordinate'] )
+    df_exoncoordinates = pd.read_csv(metadata, header = None, names = ['exon', 'coordinate'] )
     #Apply STAR vs. ENSMBL indexing correction
     df_exoncoordinates.loc[~df_exoncoordinates.exon.str.contains('exon1'), 'coordinate'] = df_exoncoordinates.coordinate+1
+    
     df_exoncoordinates.loc[df_exoncoordinates.exon.str.contains('IGHG3_exon1'), 'coordinate'] = df_exoncoordinates.coordinate+1
 
 
     #load metadata about constant region exon coordinates and I exons
-    #df_exoncoordinates = pd.read_csv("/home/mswift/B_cells/CSR/sc_RNAseq/data_tables/metadata/IGHC_exon_coordinates.csv" , header = None, names = ['exon', 'coordinate'] )
+    #df_exoncoordinates = pd.read_csv(metadata, header = None, names = ['exon', 'coordinate'] )
 
     zipper = zip(df_exoncoordinates.coordinate, df_exoncoordinates.exon)
     all_exon_starts = dict(list(zipper))
-    # hold over from other thing 
-    #I_exon_df = pd.read_csv('/home/mswift/B_cells/CSR/sc_RNAseq/data_tables/metadata/I_exon_coordinates.tab', sep = '\t', index_col=0)
-
     print("making SJTable human readable")
     ab_tx , switch_tx = makeHumanReadableSJTable(df_IGH, all_exon_starts)
     return ab_tx, switch_tx
+
 def loadChangeoDbH(filepath):
     changeo_db = pd.read_csv(filepath, index_col = 0)
     changeo_db = changeo_db[changeo_db.LOCUS == 'H']
     changeo_db["CLONE"] = changeo_db['MERGE_CLONE'] #MERGE CLONE column was created in data combination process to make the column unique
     return changeo_db
+
 def loadData(SJout, loom_data, gene_counts, changeo_db):
     ab_tx, switch_tx = loadSJoutIGH(SJout)
     ###
@@ -217,7 +227,7 @@ def preprocessScanpy(adata, num_counted_reads, num_genes, min_cells, n_neighbors
     print("normalizing by total counts per cell")
     sc.pp.normalize_total(_adata, exclude_highly_expressed=True)
     print("log transforming data")
-    sc.pp.log1p(_adata)
+    sc.pp.log1p(_adata, base=10)
     _adata.raw = _adata
     # Remove ERCCs which could drive clustering based on which batch was used or whether or not they were spiked in
     ERCCs = _adata.var.index[_adata.var.index.str.contains("ERCC-")].to_list()
@@ -242,65 +252,42 @@ def preprocessScanpy(adata, num_counted_reads, num_genes, min_cells, n_neighbors
     sc.tl.tsne(_adata)
     return _adata
 
-def plotPointPlotLocus(IGH_locus_df, cell_list):
+def plotPointPlotLocus(IGH_locus_df, cell_list, color):
     """makes a point plot of the IGH locus where reach observation is a cell and an observation consists
     of counts for each of the genes at the IgH locus"""
-
+    sns.set(style = "whitegrid", context = 'paper')
     IGH_locus_df = IGH_locus_df[IGH_locus_df.index.isin(cell_list)]
     ## Point Plot individual clones
     #Data munging
     point_plot_df = IGH_locus_df
 
     point_plot_df = point_plot_df.reset_index()
-
+    
     point_plot_df = pd.melt(point_plot_df, value_vars = point_plot_df.columns[1:], id_vars = 'index')
-    point_plot_df.columns = ['cell', 'exon', 'log2CPM']
-
+    point_plot_df.columns = ['cell', 'exon', 'log CPM']
+        
     # plotting
-    fig, ax = plt.subplots(1, 1, figsize=(12,4))
-
+    fig, ax = plt.subplots(1, 1, figsize=(6,3))
+    sns.set_palette(color)
     sns.pointplot(data = point_plot_df,
-                  x = 'exon', y = 'log2CPM', hue='cell', dodge =.2,
-                  join = True, alpha = 0.01,
-                  #order by actual locus order
-                  order = ['IGHM', 'IGHD', 'IGHG3','IGHG1', 'IGHA1',
-                           'IGHG2', 'IGHG4', 'IGHE', 'IGHA2'])
-    sns.despine()
-    ax.set_ylabel("Log2 CPM")
-    ax.set_xlabel("Cell")
-    sns.set_context("talk")
-    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-    sns.set_style("whitegrid", {'axes.grid' : False})
-
-    fig, ax = plt.subplots(1, 1, figsize=(12,4))
-
-    # Sinaplot the locus 
-    #sinaplot(data= point_plot_df, x='exon', y='log2CPM', order=['IGHM', 'IGHD', 'IGHG3','IGHG1', 'IGHA1', 'IGHG2', 'IGHG4', 'IGHE', 'IGHA2'])
-    sns.despine()
-    ax.set_ylabel("Log2 CPM")
-    ax.set_xlabel("Cell")
-    sns.set_context("talk")
-    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-    sns.set_style("whitegrid", {'axes.grid' : False})
-
-    fig, ax = plt.subplots(1, 1, figsize=(12,4))
-
+                  x = 'exon', y ='log CPM', hue='cell', dodge =.2,
+                  join = True, legend=None, alpha = 0.5)
+    ax.set_ylabel("log$_2$ CPM")
+    ax.set_xlabel("")
+    ax.legend_.remove()
     sns.pointplot(data = point_plot_df,
-                  x = 'exon', y = 'log2CPM', dodge =.2,
-                  join = True,
-                  #order by actual locus order
-                  order = ['IGHM', 'IGHD', 'IGHG3','IGHG1', 'IGHA1',
-                           'IGHG2', 'IGHG4', 'IGHE', 'IGHA2'])
+                  x = 'exon', y ='log CPM',
+                  join = True, linestyles = "--", color = 'k')
     sns.despine()
-    ax.set_ylabel("Log2 CPM")
-    ax.set_xlabel("Cell")
-    sns.set_context("talk")
-    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    ax.set_ylabel("log$_2$ CPM")
+    ax.set_xlabel("")
     sns.set_style("whitegrid", {'axes.grid' : False})
+    return fig, ax
 
-# # Scanpy helper functions:
-
+## Scanpy helper functions:
 def getCellByGeneMatrix(adata):
+    """input: adata
+        return: df cell by gene"""
     # get matrix
     _x = pd.DataFrame(adata.X)
     # add column names (genes)
@@ -308,7 +295,6 @@ def getCellByGeneMatrix(adata):
     # add row names (cells)
     _x = _x.set_index(adata.obs_names)
     return _x
-
 
 def getEmbeddingCoordinates(adata, embedding):
     #filtering for good cells
@@ -368,8 +354,6 @@ def plotLocusHeatmap(sj_out_df, isotype_call_df, row_colorby):
         isotypeColorDict = dict(zip(isotype_call_df['cell'], isotype_call_df['node_color']))
         row_colors = _df.CELL.map(isotypeColorDict)
     #plot correlogram
-    
-
     # plot
     return sns.clustermap(df, row_colors=row_colors), _df
 
@@ -416,13 +400,11 @@ def callIsotypeByBracerSJout(changeodb, ab_tx, plot):
 
     merged_df = pd.merge(dfBracer, sj_out_df, how='inner', on='CELL')
     #Take the the splice Junction calls where the J gene matches the J gene from the assembly
-    _df = merged_df[merged_df.J_CALL == merged_df.J_exon][['J_exon', 'cell', 'ISOTYPE', 'exon_start', 'unique_mapping']]
- 
+    _df = merged_df[merged_df.J_CALL == merged_df.J_exon][['J_exon', 'cell', 'ISOTYPE', 'exon_start', 'unique_mapping']] 
     # find the J to 1st constant region junction with max support (max unique mapping reads)
     idx = _df.groupby(['cell'], sort=False)['unique_mapping'].transform(max) == _df['unique_mapping']
     #filter sjout df by this
     isotype_calls_df = _df[idx]
-    
     #Plot Bar plot of relative abundances of each isotype
     if plot == True:
         f, ax = plt.subplots(figsize=(6, 15))
@@ -431,7 +413,6 @@ def callIsotypeByBracerSJout(changeodb, ab_tx, plot):
 
         ax.set(xlabel="Isotypes called by combined Bracer and SJ.out")
         ax.set()
-   
     else:
         ax = None
     # Simplify the exon_start column for plotting/display purposes
@@ -443,8 +424,8 @@ def callIsotypeByBracerSJout(changeodb, ab_tx, plot):
     return isotype_calls_df, ax
 
 def findActofSwitchingCells(ab_sjoutdf, threshold, changeodb_H, plot):
-    """ab_sjoutdf is the df filtered for J gene splices, changeo_H is 
-    the changeo_db from bracer summarise, and threshold is defines the ratio of 
+    """ab_sjoutdf is the df filtered for J gene splices, changeo_H is
+    the changeo_db from bracer summarise, and threshold is defines the ratio of
     max counts supporting the major J to C splice junction divided by the sum of all J to C splice junctions
     returns an SJout like df with only cells putatively in the act"""
     #get rid of cells expressing IGHD(the dual expression of M and D confounds my filters)
@@ -452,27 +433,24 @@ def findActofSwitchingCells(ab_sjoutdf, threshold, changeodb_H, plot):
     _df = _df[_df.exon_start.str.contains("exon1")]
     #divide the max unique mapping J to C splicing junction by the sum of all J to C splicing junctions
     _x = _df.groupby('cell').max()/_df.groupby('cell').sum()
-    # cells in the act will have a number less than 1 for this value 
+    # cells in the act will have a number less than 1 for this value
     act_cells = _x[_x.unique_mapping < threshold].index
-    #cells possibly in the act because they have multiple constant regions to J gene splicing events 
+    #cells possibly in the act because they have multiple constant regions to J gene splicing events
     _act_cells_df = _df[_df.cell.isin(act_cells)]
     #cross reference to the assembly in order to use only the productive H chain transcript
     changeo_merge = changeodb_H[['CELL', 'J_CALL', 'IN_FRAME', 'FUNCTIONAL']]
     changeo_merge.columns = ['cell', 'J_CALL', 'IN_FRAME', 'FUNCTIONAL']
+    
     merged_df = pd.merge(changeo_merge, _act_cells_df, on='cell', how='inner')
-    productive_J_tx = merged_df[merged_df['J_CALL'] == merged_df['J_exon']]
+    productive_J_tx = merged_df[merged_df['J_CALL'].str.split('*', expand = True)[0] == merged_df['J_exon']]
     productive_J_tx = productive_J_tx[productive_J_tx.IN_FRAME == True]
     productive_J_tx = productive_J_tx[productive_J_tx.FUNCTIONAL == True]
     productive_J_tx = productive_J_tx[productive_J_tx.duplicated(subset=['cell', 'J_CALL'], keep=False)]
-    
-    #log transform counts 
+    #log transform counts
     productive_J_tx['log2_unique_mapping'] = np.log2(productive_J_tx['unique_mapping'])
-    
-    
     cells_in_act = productive_J_tx.drop_duplicates()
     #Plot
     if plot == True:
-        
         f, ax = plt.subplots(figsize=(7, 20))
 
         ax = sns.barplot(data = cells_in_act, y = 'cell', x = 'log2_unique_mapping', hue = 'exon_start')
@@ -484,7 +462,6 @@ def findActofSwitchingCells(ab_sjoutdf, threshold, changeodb_H, plot):
 def plotSwitchAndAbtx(ab_tx, switch_tx, cell_list):
     """makes a point plot of the IGH locus where each observation is a cell and an observation consists
     of counts for each of the genes at the IgH locus"""
-    
     #Make ab_tx dataframe long form (cell, exon_start, unique_mapping)
     _dfab = ab_tx[ab_tx.exon_start.str.contains('exon1')].copy()
     _dfab_sum = _dfab.groupby(['cell', 'exon_start']).sum()
