@@ -1,0 +1,18 @@
+axes.titlesize : 11
+axes.labelsize : 11
+lines.linewidth : 0.8
+lines.markersize : 1
+xtick.labelsize : 11
+xtick.major.pad: 5.6
+xtick.major.width: 0.8
+xtick.minor.width:0.4
+ytick.major.pad: 5.6
+ytick.major.width: 0.8
+ytick.minor.width: 0.4
+ytick.labelsize : 11
+font.family: sans-serif
+figure.figsize:2.25,2.25 
+legend.markerscale:2
+legend.fontsize:11
+legend.frameon: False
+
