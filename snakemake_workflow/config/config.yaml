@@ -1,0 +1,37 @@
+# ----------------------------------------
+# General
+# path to sheet describing each cell
+10X_lanes: ["L01_Input","L04_T4", "L06_T8", "L08_T12", "BMPC_L1", "BMPC_L2", "10K_BMMNC", "10K_PBMC", "20K_PBMC"]
+#10X_lanes: ["BMPC_L1"]
+# output directory for processed data
+base: "/oak/stanford/groups/quake/mswift/BCD_Combined"
+raw_data: ""
+workflow_dir: "/home/groups/quake/mswift/5prime_10X_workflow/"
+# the assembly pipeline uses the immcantation framework for IgBLAST
+# gene segment calling and results parsing
+# options: 'docker' or 'singularity'
+container_type: singularity
+
+# human or mouse
+species: human
+# partition (for cluster computing)
+partition: "quake,owners"
+# Software
+#---------------------------
+cell_ranger: "/home/groups/quake/mswift/resources/cellranger-6.0.1"
+cell_ranger: "/home/groups/quake/mswift/resources/cellranger-7.0.1"
+resources: "/home/groups/quake/mswift/5prime_10X_workflow/resources"
+# references
+vdj_ref_prefix: "vdj_human"
+cell_ranger_ref: "/oak/stanford/groups/quake/mswift/resources/cellranger/refdata-cellranger-vdj-GRCh38-alts-ensembl-3.1.0/"
+10X_transcriptome: "https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2020-A.tar.gz"
+
+# STAR alignment: fasta and gtf files
+# (these should not need to be changed)
+ighc_db:
+  human: db/IGHC/human_IGHC_IMGT_membrane_only_reformatted.fasta
+  imgt_exons: db/IGHC/IGHC_exons.bed
+  imgt_introns: db/IGHC/IGHC_introns_inner.bed
+  mouse: db/IGHC/mouse_IGHC_IMGT_reformatted.fasta
+decontX_mode: "raw"
+scripts: ./scripts

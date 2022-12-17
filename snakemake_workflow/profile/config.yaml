@@ -1,0 +1,41 @@
+cluster:
+  mkdir -p logs/{rule} &&
+  sbatch
+    --job-name={rule}
+    --time={resources.time}    
+    --partition={resources.partition}
+    --cpus-per-task={threads}
+    --mem={resources.mem_mb}
+    --output=logs/{rule}/{rule}-%j.out
+    --error=logs/{rule}/{rule}-%j.err
+    --gpus={resources.gpus}
+
+default-resources:
+  - partition=normal,owners,quake
+  - mem_mb=4000
+  - gpus=0
+  - time="03:00:00"
+  - threads=1
+  
+restart-times: 0
+max-jobs-per-second: 10
+max-status-checks-per-second: 1
+local-cores: 1
+latency-wait: 60
+jobs: 500
+keep-going: True
+rerun-incomplete: True
+printshellcmds: True
+scheduler: greedy
+use-conda: True
+use-singularity: True
+snakefile: Snakefile.smk
+keep-incomplete: True
+set-resources:
+    - run_cellbender:mem_mb=16000
+    - run_cellbender:time=4:00:00
+    - run_cellbender:partition=gpu
+    - run_cellbender:gpus=1
+    - scirpy_merge:time=1:00:00
+    - scirpy_merge:mem_mb=32000
+    - aggregate_gex:mem_mb=64000

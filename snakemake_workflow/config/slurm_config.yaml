@@ -1,0 +1,59 @@
+__default__:
+    time: '2:00:00'
+    name: "{rule}"
+    partition: normal,owners,quake
+    mem_mb: '16000'
+    ntasks: '1'
+    gpus: '0'
+    cpus-per-task: '2'
+    output: 'snakemake_logs/slurm_logs/{rule}_%j.out'
+    error: 'snakemake_logs/slurm_logs/{rule}_%j.err'
+
+cellranger_multi:
+    time: '48:00:00'
+    name: '{rule}'
+    partition: quake
+    mem_mb: '210000'
+    ntasks: '1'
+    cpus-per-task: '20'
+    output: 'snakemake_logs/slurm_logs/{rule}_%j.out'
+    error: 'snakemake_logs/slurm_logs/{rule}_%j.err'
+
+run_cellbender:
+    time: '4:00:00'
+    name: '{rule}'
+    partition: quake,gpu
+    gpus: '1'
+    mem_mb: "16000"
+    output: 'snakemake_logs/slurm_logs/{rule}_%j.out'
+    error: 'snakemake_logs/slurm_logs/{rule}_%j.err'
+
+preprocess_gex:
+    time: '1:00:00'
+    name: '{rule}'
+    partition: quake,owners
+    mem_mb: '210000'
+    ntasks: '1'
+    cpus-per-task: '20'
+    output: 'snakemake_logs/slurm_logs/{rule}_%j.out'
+    error: 'snakemake_logs/slurm_logs/{rule}_%j.err'
+
+run_decontx:
+    time: '2:00:00'
+    name: '{rule}'
+    partition: quake,owners
+    mem_mb: '128000'
+    ntasks: '1'
+    cpus-per-task: '20'
+    output: 'snakemake_logs/slurm_logs/{rule}_%j.out'
+    error: 'snakemake_logs/slurm_logs/{rule}_%j.err'
+
+aggregate_gex:
+    time: '3:00:00'
+    name: '{rule}'
+    partition: quake,owners
+    mem_mb: '64000'
+    ntasks: '1'
+    cpus-per-task: '20'
+    output: 'snakemake_logs/slurm_logs/{rule}_%j.out'
+    error: 'snakemake_logs/slurm_logs/{rule}_%j.err'

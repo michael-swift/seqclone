@@ -1,0 +1,16 @@
+[gene-expression]
+ref,/home/groups/quake/mswift/5prime_10X_workflow/db/refdata-gex-GRCh38-2020-A
+include-introns,true
+
+[feature]
+ref,/home/groups/quake/mswift/5prime_10X_workflow/db/totalseq/5pv2_multi_count_feature_reference_b_cell_panel.csv
+
+[vdj]
+ref,/home/groups/quake/mswift/5prime_10X_workflow/db/vdj_reference
+inner-enrichment-primers,/home/groups/quake/mswift/5prime_10X_workflow/db/inner_primers.txt
+
+[libraries]
+fastq_id,fastqs,lanes,physical_library_id,feature_types,subsample_rate
+L01_Input_GEX,/oak/stanford/groups/quake/shared/swiftShare/BCD_Combined/InVitro_BCell_Dynamics,any,L01_Input_GEX,Gene Expression,
+L01_Input_VDJ,/oak/stanford/groups/quake/shared/swiftShare/BCD_Combined/InVitro_BCell_Dynamics,any,L01_Input_VDJ,VDJ-B
+L01_Input_CS,/oak/stanford/groups/quake/shared/swiftShare/BCD_Combined/InVitro_BCell_Dynamics,any,L01_Input_CS,Antibody Capture,

@@ -1,0 +1,11 @@
+[gene-expression]
+ref,/home/groups/quake/mswift/5prime_10X_workflow/db/refdata-gex-GRCh38-2020-A
+include-introns,true
+
+[vdj]
+ref,/home/groups/quake/mswift/5prime_10X_workflow/db/vdj_reference
+
+[libraries]
+fastq_id,fastqs,lanes,physical_library_id,feature_types,subsample_rate
+10k_BMMNC_5pv2_nextgem_gex,/oak/stanford/groups/quake/shared/swiftShare/BCD_Combined/InVitro_BCell_Dynamics,any,10k_BMMNC_5pv2_nextgem_gex,Gene Expression,
+10k_BMMNC_5pv2_nextgem_vdj_b,/oak/stanford/groups/quake/shared/swiftShare/BCD_Combined/InVitro_BCell_Dynamics,any,10k_BMMNC_5pv2_nextgem_vdj_b,VDJ-B,
