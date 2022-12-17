@@ -134,3 +134,4 @@ dmypy.json
 *.gz
 *.h5
 *.h5ad
+*stats.csv
