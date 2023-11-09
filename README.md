@@ -1,5 +1,5 @@
 # seqclone
-seqclone is an algorithm which identified genes expression that are inherited by clones during differentiation. These genes could become targets for further functional studies and have been useful for quantifying the extent of clonal effects in differentiation. 
+seqclone is an algorithm which identifies genes expression states that are inherited by clones during differentiation. These genes could become targets for further functional studies and have been useful for quantifying the extent of clonal effects in differentiation. 
 # approach 
 It implements the approach described here:
    - https://doi.org/10.4049/jimmunol.1800481
