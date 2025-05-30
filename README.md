@@ -1,8 +1,6 @@
 # seqclone
 
-seqclone is an algorithm that identifies gene expression states inherited by clones during differentiation. These genes could become targets for further functional studies and have been useful for quantifying the extent of clonal effects in differentiation. I used it for the analyses in the paper ["Lineage tracing reveals fate bias and transcriptional memory in human B cells"](https://www.life-science-alliance.org/content/lsa/6/3/e202201792.full.pdf), for which you can find the processed data [here](link-to-processed-data).
-
-## Approach
+seqclone is an algorithm that identifies gene expression states inherited by clones during differentiation. These genes could become targets for further functional studies and have been useful for quantifying the extent of clonal effects in differentiation. I used it for the analyses in the paper ["Lineage tracing reveals fate bias and transcriptional memory in human B cells"](https://www.life-science-alliance.org/content/lsa/6/3/e202201792.full.pdf).
 
 It implements the approach described in ["Multiplexed Division Tracking Dyes for Proliferation-Based Clonal Lineage Tracing"](https://doi.org/10.4049/jimmunol.1800481) but does so in Python, on a transcriptomic scale, using single-cell RNA-seq data (although any other data type in AnnData format with clonal labels should work).
 
