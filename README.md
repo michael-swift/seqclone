@@ -16,7 +16,7 @@ The script `run_seqclone.py` is used to identify genes with clonally inherited e
 2. The configuration file is an `.ini` file that contains parameters for filtering and input/output settings. The script reads these parameters using the `configparser` module.
 
 3. The script loads the single-cell RNA-seq data from an `h5ad` file specified in the configuration file using the `scanpy` library.
-4. 
+
 To use the script, you need to:
 1. Prepare your single-cell RNA-seq data in `h5ad` format with a column in `adata.obs` named "clone_id" indicating the clonal membership of each cell.
 2. Create a configuration file specifying the input data, filtering parameters, and output settings.
